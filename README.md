@@ -27,7 +27,7 @@ Usage: https-proxy <options>
 
 Options:
   -t, --target  target address, like http://localhost:80  [required]
-  -p, --port    port to use for https, default is 3000
+  -p, --port    port to use for https                     [default: 3000]
   --keys        path for storing .key.pem and .cert.pem   [string]  [default: "."]
   --insecure    flag to accept insecure connections
   --xfwd        adds x-forward headers
