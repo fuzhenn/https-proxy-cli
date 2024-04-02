@@ -27,6 +27,8 @@ const argv = require('optimist')
   .describe('xfwd', 'adds x-forward headers')
   .alias('x', 'xfwd')
 
+  .describe('cors', 'set response header Access-Control-Allow-Origin to *')
+
   .describe(
     'rewrite-origin',
     'changes the origin of the host header to the target URL'
@@ -84,8 +86,8 @@ getKeys((err, keys) => {
     console.error(err)
     process.exit(1)
   }
-  const port = argv.port || 443;
-  httpProxy
+  const port = argv.port || 3000
+  const proxyHttp = httpProxy
     .createServer({
       target: argv.target,
       ssl: {
@@ -96,12 +98,30 @@ getKeys((err, keys) => {
       xfwd: argv.xfwd,
       changeOrigin: argv['rewrite-origin'],
       autoRewrite: argv['rewrite-location'],
-      cookieDomainRewrite: argv['rewrite-cookies-domain'] ? '' : false,
-      headers: {
-        'Access-Control-Allow-Origin': '*'
-      }
+      cookieDomainRewrite: argv['rewrite-cookies-domain'] ? '' : false
     })
     .listen(port, (_) => {
       console.log(`HTTPS proxy started on https://localhost:${port}`)
     })
+  if (argv.cors) {
+    // https://github.com/http-party/node-http-proxy/issues/872
+    proxyHttp.on('proxyRes', (proxyRes, req, res) => {
+      res.setHeader('access-control-allow-origin', '*')
+      res.setHeader('access-control-allow-credentials', 'true')
+    
+      if (req.headers['access-control-request-method']) {
+        res.setHeader('access-control-allow-methods', req.headers['access-control-request-method'])
+      }
+    
+      if (req.headers['access-control-request-headers']) {
+        res.setHeader('access-control-allow-headers', req.headers['access-control-request-headers'])
+      }
+      
+      if (req.method === 'OPTIONS') {
+        res.writeHead(200)
+        res.end()
+      }
+    });
+  }
+  
 })
