@@ -5,6 +5,7 @@ const pem = require('pem')
 const console = require('console')
 const fs = require('fs')
 const path = require('path')
+const defaultPort = 3000
 
 const argv = require('optimist')
   .usage(
@@ -17,6 +18,7 @@ const argv = require('optimist')
 
   .alias('p', 'port')
   .describe('p', 'port to use for https')
+  .default('p', defaultPort)
 
   .describe('keys', 'path for storing .key.pem and .cert.pem')
   .default('keys', '.')
@@ -86,7 +88,7 @@ getKeys((err, keys) => {
     console.error(err)
     process.exit(1)
   }
-  const port = argv.port || 3000
+  const port = argv.port || defaultPort
   const proxyHttp = httpProxy
     .createServer({
       target: argv.target,
@@ -121,7 +123,7 @@ getKeys((err, keys) => {
         res.writeHead(200)
         res.end()
       }
-    });
+    })
   }
   
 })
