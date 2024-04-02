@@ -88,7 +88,7 @@ getKeys((err, keys) => {
     console.error(err)
     process.exit(1)
   }
-  const port = argv.port || defaultPort
+  const port = argv.port
   const proxyHttp = httpProxy
     .createServer({
       target: argv.target,
